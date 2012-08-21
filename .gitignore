@@ -1,4 +1,4 @@
-target/
+java/target/
 .idea/ant.xml
 .idea/workspace.xml
 .idea/uiDesigner.xml
@@ -8,4 +8,5 @@ target/
 .idea/dictionaries/
 .idea/libraries/Maven*
 .idea/inspectionProfiles/profiles_settings.xml
+*.pyc
 

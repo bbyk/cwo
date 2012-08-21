@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/bbyk-problems.iml" filepath="$PROJECT_DIR$/bbyk-problems.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java/problems.iml" filepath="$PROJECT_DIR$/java/problems.iml" />
+      <module fileurl="file://$PROJECT_DIR$/python/python.iml" filepath="$PROJECT_DIR$/python/python.iml" />
     </modules>
   </component>
 </project>
