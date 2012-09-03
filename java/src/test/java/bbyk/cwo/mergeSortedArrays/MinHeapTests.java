@@ -1,4 +1,4 @@
-package bbyk.problems.mergeSortedArrays;
+package bbyk.cwo.mergeSortedArrays;
 
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;

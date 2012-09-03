@@ -1,4 +1,4 @@
-package bbyk.problems.mergeSortedArrays;
+package bbyk.cwo.mergeSortedArrays;
 
 import java.util.ArrayList;
 import java.util.Collections;
