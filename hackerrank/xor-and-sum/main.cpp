@@ -1,4 +1,4 @@
-// https://www.hackerrank.com/challenges/xor-and-sum/submissions/code/2209370
+// https://www.hackerrank.com/challenges/xor-and-sum
 
 #include <cmath>
 #include <cstdio>
