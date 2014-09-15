@@ -12,9 +12,16 @@
 using namespace std;
 
 #define PRIME 1000000007L
-#define BITS_IN_BYTE 8
 #define MAX_ITER 314159
 
+/**
+* The main idea here is that "b" while shifting to left go past bits of "a". E.g. "b" is "10" and "a" is 101.
+* Take lowest bit in "b". It will be xor'ed with every bit in "a" while shifting left. If we pre-calculate partial sums
+* for "a' such that they will be from the series "1" % prime, "10" % prime, "101" % prime then you can sum those in "a" that have "1" in the
+* digit.
+*
+* 101 = 101 * (1 << 0) + 1 * (1 << 2)
+*/
 void bignum_mod_prime(string line, unsigned long *a1pr, unsigned long *a0pr, unsigned max_bits, unsigned prime) {
     unsigned long v1 = 0;
     unsigned long v0 = 0;
@@ -70,6 +77,10 @@ int main(int argc, const char *argv[]) {
 
     unsigned long suma = 0L;
 
+    /**
+    * when "b" shifts left, bits on "a" right to the lowest
+    * bit in "b" xor to them selves. Pre-calculate them.
+    */
     for (long i = 0; i < MAX_ITER; i++) {
         char c = i >= aw ? '0' : a[aw - i - 1];
         if ('1' == c) {
@@ -85,8 +96,10 @@ int main(int argc, const char *argv[]) {
     for (long i = 0; i < max(bw, aw); i++) {
         char c = i >= bw ? '0' : b[bw - i - 1];
         if ('0' == c) {
+            // add partial sum for "b" 0.
             sum0 = (sum0 + (a1pr[i] * av)) % PRIME;
         } else {
+            // add partial sum for "b" 1. also add all digits for after shifting all the way to the left.
             sum1 = (sum1 + (a0pr[i] * av) + sumb) % PRIME;
         }
 
