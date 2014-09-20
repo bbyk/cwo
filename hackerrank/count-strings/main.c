@@ -27,7 +27,7 @@ mpool *mp_new(size_t mp_capacity) {
 }
 
 void *mp_alloc(mpool *p, size_t size) {
-    if (p->cur + size > p->cap)
+    if ((p->cur + size) > p->cap)
         return NULL;
     void *r = p->cur;
     p->cur += size;
