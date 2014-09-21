@@ -14,7 +14,6 @@ class Nfa(object):
 
     def new_state(self):
         s = State()
-        s.id = len(self.states)
         self.states.append(s)
         return s
 
@@ -38,12 +37,12 @@ class Parser(object):
         self.caret = 0
 
     def parse(self):
-        self.parse_node()
+        self.parse_next()
         self.nfa.ss = self.s_stack.pop()
         self.nfa.acs = self.s_stack.pop()
         return self.nfa
 
-    def parse_node(self):
+    def parse_next(self):
         """
         http://www.codeproject.com/Articles/5412/Writing-own-regular-expression-parser 
         """
@@ -58,11 +57,11 @@ class Parser(object):
             self.caret += 1
         elif c == '(':
             self.caret += 1
-            self.parse_node()
+            self.parse_next()
             c = self.pattern[self.caret]
             if c == '|':
                 self.caret += 1
-                self.parse_node()
+                self.parse_next()
 
                 l = self.nfa.new_state()
                 r = self.nfa.new_state()
@@ -83,8 +82,10 @@ class Parser(object):
                 rr = self.s_stack.pop()
                 rr.trans.append(Transition('e', r))
                 rr.trans.append(Transition('e', ll))
+
+                self.caret += 1
             else:
-                self.parse_node()
+                self.parse_next()
                 sl = self.s_stack.pop()
                 sr = self.s_stack.pop()
                 rl = self.s_stack.pop()
@@ -103,7 +104,9 @@ class Parser(object):
 class Dfa(object):
     def __init__(self, nfa):
         self.nfa = nfa
+        # visited eplison closures to state id
         self.visited = dict()
+        # epsilon closure states that DFA states
         self.dfs = []
         self.dfa = dict()
         self.sid = 0
@@ -111,15 +114,9 @@ class Dfa(object):
         self.build_dfa()
         self.build_adjacency_matrix()
 
-    class State(object):
-
-        def __init__(self, u):
-            self.trans = []
-            self.u = u
-
     @staticmethod
     def epsilon_closure(T):
-        # on epsilon trans we can go to the same node
+        # on epsilon transition we can go to the same node
         res = set(T)
         # copy the set the stack
         stack = list(T)
@@ -134,33 +131,31 @@ class Dfa(object):
         return frozenset(res)
 
     def build_dfa(self):
-        dstates = [self.epsilon_closure([self.nfa.ss])]
+        stack = [self.epsilon_closure([self.nfa.ss])]
 
-        while len(dstates):
-            t = dstates.pop()
+        while len(stack):
+            epsc_st = stack.pop()
 
-            self.visited[t] = self.sid
-            self.dfs.append(t)
+            self.visited[epsc_st] = self.sid
+            self.dfs.append(epsc_st)
             self.sid += 1
 
             for c in ['a', 'b']:
-                t_on_c = self.move(t, c)
-                if not len(t_on_c):
+                st_on_c = self.move(epsc_st, c)
+                if not len(st_on_c):
                     continue
-                u = self.epsilon_closure(t_on_c)
+                u = self.epsilon_closure(st_on_c)
                 if u not in self.visited:
-                    dstates.append(u)
-                    if t not in self.dfa:
-                        self.dfa[t] = {c: u}
-                    else:
-                        self.dfa[t][c] = u
+                    stack.append(u)
+                    if epsc_st not in self.dfa:
+                        self.dfa[epsc_st] = dict()
+                    self.dfa[epsc_st][c] = u
 
-        pass
 
     @staticmethod
-    def move(t, c):
+    def move(states, c):
         res = set()
-        for s in t:
+        for s in states:
             for tr in s.trans:
                 if tr.c == c:
                     res.add(tr.s)
@@ -182,19 +177,19 @@ class Solution(object):
 
     def get_number(self, l):
         if l > 1:
-            m = self.multiply(l)
+            m = self.multiply_exp(l)
         else:
             m = self.dfa.matrix
         sum = 0
-        for ix in xrange(1, len(m[0])):
+        for ix in xrange(len(m[0])):
             dfs_state = self.dfa.dfs[ix]
             if self.dfa.nfa.acs in dfs_state:
                 sum = (sum + m[0][ix]) % 1000000007
 
         return sum
 
-    def multiply(self, l):
-        pass
+    def multiply_exp(self, l):
+        return self.dfa.matrix
 
 
 if __name__ == "__main__":
