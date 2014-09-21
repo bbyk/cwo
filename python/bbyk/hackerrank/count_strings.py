@@ -6,6 +6,10 @@ import sys
 class Nfa(object):
     def __init__(self):
         self.states = []
+        # start state
+        self.ss = None
+        # acceptance state
+        self.acs = None
 
 
     def new_state(self):
@@ -35,7 +39,9 @@ class Parser(object):
 
     def parse(self):
         self.parse_node()
-        pass
+        self.nfa.ss = self.s_stack.pop()
+        self.nfa.acs = self.s_stack.pop()
+        return self.nfa
 
     def parse_node(self):
         """
@@ -57,6 +63,7 @@ class Parser(object):
             if c == '|':
                 self.caret += 1
                 self.parse_node()
+
                 l = self.nfa.new_state()
                 r = self.nfa.new_state()
 
@@ -93,6 +100,103 @@ class Parser(object):
         self.s_stack.append(l)
 
 
+class Dfa(object):
+    def __init__(self, nfa):
+        self.nfa = nfa
+        self.visited = dict()
+        self.dfs = []
+        self.dfa = dict()
+        self.sid = 0
+        self.matrix = []
+        self.build_dfa()
+        self.build_adjacency_matrix()
+
+    class State(object):
+
+        def __init__(self, u):
+            self.trans = []
+            self.u = u
+
+    @staticmethod
+    def epsilon_closure(T):
+        # on epsilon trans we can go to the same node
+        res = set(T)
+        # copy the set the stack
+        stack = list(T)
+
+        while len(stack):
+            s = stack.pop()
+            for tr in s.trans:
+                if tr.c == 'e' and tr.s not in res:
+                    res.add(tr.s)
+                    stack.append(tr.s)
+
+        return frozenset(res)
+
+    def build_dfa(self):
+        dstates = [self.epsilon_closure([self.nfa.ss])]
+
+        while len(dstates):
+            t = dstates.pop()
+
+            self.visited[t] = self.sid
+            self.dfs.append(t)
+            self.sid += 1
+
+            for c in ['a', 'b']:
+                t_on_c = self.move(t, c)
+                if not len(t_on_c):
+                    continue
+                u = self.epsilon_closure(t_on_c)
+                if u not in self.visited:
+                    dstates.append(u)
+                    if t not in self.dfa:
+                        self.dfa[t] = {c: u}
+                    else:
+                        self.dfa[t][c] = u
+
+        pass
+
+    @staticmethod
+    def move(t, c):
+        res = set()
+        for s in t:
+            for tr in s.trans:
+                if tr.c == c:
+                    res.add(tr.s)
+        return res
+
+    def build_adjacency_matrix(self):
+        self.matrix = [[0 for x in xrange(self.sid)] for x in xrange(self.sid)]
+        for ix, t in enumerate(self.dfs):
+            if t not in self.dfa:
+                continue
+            for u in self.dfa[t].values():
+                self.matrix[ix][self.visited[u]] = 1
+        pass
+
+
+class Solution(object):
+    def __init__(self, dfa):
+        self.dfa = dfa
+
+    def get_number(self, l):
+        if l > 1:
+            m = self.multiply(l)
+        else:
+            m = self.dfa.matrix
+        sum = 0
+        for ix in xrange(1, len(m[0])):
+            dfs_state = self.dfa.dfs[ix]
+            if self.dfa.nfa.acs in dfs_state:
+                sum = (sum + m[0][ix]) % 1000000007
+
+        return sum
+
+    def multiply(self, l):
+        pass
+
+
 if __name__ == "__main__":
     cin = None
 
@@ -108,6 +212,9 @@ if __name__ == "__main__":
         regex, L = line.split(' ', 1)
         L = int(L)
         nfa = Parser(regex).parse()
+        dfa = Dfa(nfa)
+        solution = Solution(dfa)
+        print solution.get_number(L)
         T -= 1
 
     if cin is not sys.stdin:
