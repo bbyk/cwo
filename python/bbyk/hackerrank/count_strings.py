@@ -15,6 +15,7 @@ class Nfa(object):
     def new_state(self):
         s = State()
         self.states.append(s)
+        s.id = len(self.states)
         return s
 
 
@@ -105,7 +106,7 @@ class Dfa(object):
     def __init__(self, nfa):
         self.nfa = nfa
         # visited eplison closures to state id
-        self.visited = dict()
+        self.in_dfs = dict()
         # epsilon closure states that DFA states
         self.dfs = []
         self.dfa = dict()
@@ -132,11 +133,12 @@ class Dfa(object):
 
     def build_dfa(self):
         stack = [self.epsilon_closure([self.nfa.ss])]
+        marked = set(stack)
 
         while len(stack):
             epsc_st = stack.pop()
 
-            self.visited[epsc_st] = self.sid
+            self.in_dfs[epsc_st] = self.sid
             self.dfs.append(epsc_st)
             self.sid += 1
 
@@ -145,11 +147,12 @@ class Dfa(object):
                 if not len(st_on_c):
                     continue
                 u = self.epsilon_closure(st_on_c)
-                if u not in self.visited:
+                if u not in marked:
+                    marked.add(u)
                     stack.append(u)
-                    if epsc_st not in self.dfa:
-                        self.dfa[epsc_st] = dict()
-                    self.dfa[epsc_st][c] = u
+                if epsc_st not in self.dfa:
+                    self.dfa[epsc_st] = dict()
+                self.dfa[epsc_st][c] = u
 
 
     @staticmethod
@@ -167,7 +170,7 @@ class Dfa(object):
             if t not in self.dfa:
                 continue
             for u in self.dfa[t].values():
-                self.matrix[ix][self.visited[u]] = 1
+                self.matrix[ix][self.in_dfs[u]] = 1
         pass
 
 
@@ -189,7 +192,27 @@ class Solution(object):
         return sum
 
     def multiply_exp(self, l):
-        return self.dfa.matrix
+        r = None
+        m = self.dfa.matrix
+        while l > 0:
+            if l & 1:
+                r = self.multiply_m(m, r) if r is not None else m
+            m = self.multiply_m(m, m)
+            l >>= 1
+
+        return r
+
+    @staticmethod
+    def multiply_m(m, l):
+        r = []
+        for j in xrange(len(m)):
+            r.append([])
+            for k in xrange(len(m[j])):
+                sum = 0
+                for i in xrange(len(m[j])):
+                    sum = (sum + m[j][i] * l[i][k]) % 1000000007
+                r[j].append(sum)
+        return r
 
 
 if __name__ == "__main__":
