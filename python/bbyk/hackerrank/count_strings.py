@@ -165,7 +165,7 @@ class Dfa(object):
         return res
 
     def build_adjacency_matrix(self):
-        self.matrix = [[0 for x in xrange(self.sid)] for x in xrange(self.sid)]
+        self.matrix = [[0 for x in range(self.sid)] for x in range(self.sid)]
         for ix, t in enumerate(self.dfs):
             if t not in self.dfa:
                 continue
@@ -184,7 +184,7 @@ class Solution(object):
         else:
             m = self.dfa.matrix
         sum = 0
-        for ix in xrange(len(m[0])):
+        for ix in range(len(m[0])):
             dfs_state = self.dfa.dfs[ix]
             if self.dfa.nfa.acs in dfs_state:
                 sum = (sum + m[0][ix]) % 1000000007
@@ -205,11 +205,11 @@ class Solution(object):
     @staticmethod
     def multiply_m(m, l):
         r = []
-        for j in xrange(len(m)):
+        for j in range(len(m)):
             r.append([])
-            for k in xrange(len(m[j])):
+            for k in range(len(m[j])):
                 sum = 0
-                for i in xrange(len(m[j])):
+                for i in range(len(m[j])):
                     sum = (sum + m[j][i] * l[i][k]) % 1000000007
                 r[j].append(sum)
         return r
@@ -232,7 +232,7 @@ if __name__ == "__main__":
         nfa = Parser(regex).parse()
         dfa = Dfa(nfa)
         solution = Solution(dfa)
-        print solution.get_number(L)
+        print(solution.get_number(L))
         T -= 1
 
     if cin is not sys.stdin:
