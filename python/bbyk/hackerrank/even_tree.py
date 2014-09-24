@@ -19,9 +19,9 @@ def read_tree(N):
 
 
 def num_to_remove(tree, node, cnt):
-    if node not in tree:
-        return 1
     sum = 1
+    if node not in tree:
+        return sum
     for i in tree[node]:
         ns = num_to_remove(tree, i, cnt)
         if not ns & 1:
