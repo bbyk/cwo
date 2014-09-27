@@ -23,10 +23,12 @@ class Solution:
         while to-vertex is mapped to an odd number. This splits the graph in crabs.
         This also allows us to create a flow network graph. 
         '''
-        self.adj_mtx = [[0 for j in range(self.map_odd(self.N) + 1)] for i in range(self.map_odd(self.N) + 1)]
+        self.adj_mtx = [[0 for j in range(self.map_odd(self.N))] for i in range(self.map_odd(self.N))]
 
         for i in range(M):
             f, t = [int(t) for t in cin.readline().split(' ', 1)]
+            f -= 1  # we need zero based indexing
+            t -= 1  # we need zero based indexing
             # The capacity for each edge is infinite, i.e. greater than max T
             self.adj_mtx[self.map_even(f)][self.map_odd(t)] = Solution.C_MAX
             self.adj_mtx[self.map_even(t)][self.map_odd(f)] = Solution.C_MAX
@@ -41,7 +43,6 @@ class Solution:
         for i in range(self.N):
             self.adj_mtx[0][self.map_even(i)] = self.T
             self.adj_mtx[self.map_odd(i)][1] = 1
-        pass
 
     def max_vertices_covered(self):
         '''
@@ -49,10 +50,12 @@ class Solution:
         '''
         self.flow_mtx = [[0 for j in range(self.map_odd(self.N) + 1)] for i in range(self.map_odd(self.N) + 1)]
 
+        max_flow = 0
         while True:
             min_cap, path = self.bfs()
             if not min_cap:
                 break
+            max_flow += min_cap
             v = 1  # sink node
             while v != 0:  # source node
                 u = path[v]
@@ -62,11 +65,7 @@ class Solution:
                 self.flow_mtx[v][u] -= min_cap
                 v = u
 
-        sum = 0
-        for i in range(self.N):
-            if self.flow_mtx[0][self.map_even(i)] == self.T:
-                sum += self.T + 1  # 1 head and T feet
-        return sum
+        return max_flow
 
     def bfs(self):
         path = dict()
