@@ -1,4 +1,5 @@
 import sys
+from collections import OrderedDict
 
 __author__ = 'bbyk'
 
@@ -7,21 +8,27 @@ class Solution:
     g_cache = {}
 
     def __init__(self, str):
-        self.sorted_key, self.str = self.normalize(str)
+        self.str = str
+        self.mid_c = None
+        self.norm_str = None
 
     def expectation(self):
         if self.is_palindom(self.str):
             return 0
 
+        self.normalize()
+
         if self.sorted_key not in self.g_cache:
             self.build_cache()
-        return round(self.g_cache[self.sorted_key][self.str], 4)
+        return round(self.g_cache[self.sorted_key][self.norm_str], 4)
 
 
-    @staticmethod
-    def normalize(s):
-        ht = {}
-        for c in s:
+    def normalize(self):
+        if self.norm_str is not None:
+            return
+
+        ht = OrderedDict()
+        for c in self.str:
             if c not in ht:
                 ht[c] = [c, 1]
             else:
@@ -31,28 +38,27 @@ class Solution:
         c = ord('a')
         for i in range(len(vals)):
             p = vals[i]
-            ht[p[0]] = chr(c + i)
+            norm_c = chr(c + i)
+            if p[1] == 1:
+                self.mid_c = norm_c
+            ht[p[0]] = norm_c
             for j in range(p[1]):
-                key.append(chr(c + i))
+                key.append(norm_c)
 
-        return "".join(key), "".join([ht[c] for c in s])
+        self.sorted_key = "".join(key)
+        self.norm_str = "".join([ht[c] for c in self.str])
 
-    @staticmethod
-    def distance(s):
-        ht = {}
-        for c in s:
-            if c not in ht:
-                ht[c] = 1
-            else:
-                ht[c] += 1
-        swaps = 0
-        for i in range(len(s) >> 1):
-            c = s[i]
-            if ht[c] == 1:
-                swaps += 1
-            elif s[-i - 1] != c:
-                swaps += 1
-        return swaps
+    def distance(self):
+        self.normalize()
+
+        swaps2p = 0
+        for i in range(len(self.norm_str) >> 1):
+            c = self.norm_str[i]
+            if c == self.mid_c:
+                swaps2p += 1
+            elif self.norm_str[-i - 1] != c:
+                swaps2p += 1
+        return swaps2p
 
 
     @staticmethod
@@ -101,7 +107,7 @@ class Solution:
             p = 1 / n_perm
 
         assert self.sorted_key in vars
-        assert self.str in vars
+        assert self.norm_str in vars
 
         m = [[(0 if t < var_id else -1) for t in range(var_id + 1)] for j in range(var_id)]
         for i, eqv in enumerate(eqvs):

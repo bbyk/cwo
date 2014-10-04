@@ -23,9 +23,11 @@ class PalindromTests(unittest.TestCase):
         self.assertEqual(28, len(swaps))
 
     def test_normalize(self):
-        key, value = Solution.normalize("gzhhg")
-        self.assertEqual(key, "abbcc")
-        self.assertEqual(value, "baccb")
+        s = Solution("gzhhg")
+        s.normalize()
+        self.assertEqual(s.sorted_key, "abbcc")
+        self.assertEqual(s.norm_str, "baccb")
+        self.assertEqual(s.mid_c, 'a')
 
     def test_expectation(self):
         # self.assertEqual(3, Solution("abb").expectation())
@@ -40,10 +42,10 @@ class PalindromTests(unittest.TestCase):
         pass
 
     def test_distance(self):
-        foo = Solution.distance("abcccbc")
-        bar = Solution.distance("bcacccb")
+        foo = Solution("abcccbc").distance()
+        bar = Solution("bcacccb").distance()
         self.assertEqual(foo, bar)
-        
+        self.assertEqual(1, foo)
 
 
 if __name__ == '__main__':
