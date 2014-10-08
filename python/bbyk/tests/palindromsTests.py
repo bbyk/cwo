@@ -20,6 +20,11 @@ class PalindromTests(unittest.TestCase):
         self.assertTrue(Solution.is_palindom("bab"))
         self.assertFalse(Solution.is_palindom("abb"))
 
+    def test_sameness(self):
+        l = list(Solution.same_of("abcdabcd"))
+        s = set(l)
+        self.assertEqual(len(l), len(s))
+
     def test_swaps(self):
         swaps = list(Solution.swaps("cdbbaadc"))
         self.assertEqual(28, len(swaps))
@@ -31,20 +36,10 @@ class PalindromTests(unittest.TestCase):
         self.assertEqual(s.norm_str, "baccb")
         self.assertEqual(s.mid_c, 'a')
 
-    def test_swaps(self):
-        l = list(Solution("cbaabbb").swaps("cbaabbb"))
-        h = {}
-        for p in l:
-            if p not in h:
-                h[p] = 1
-            else:
-                h[p] += 1
-        s = set(l)
-        print(len(l), len(h), h)
-        pass
     def test_expectation(self):
         # self.assertEqual(3, Solution("abb").expectation())
         self.assertEqual(59.3380, Solution("cbaabbb").expectation())
+        self.assertEqual(59.3380, Solution("abcdabcd").expectation())
         # self.assertEqual(59.3380, Solution("cbdecbd").expectation())
 
     def test_allpalin(self):
@@ -69,12 +64,6 @@ class PalindromTests(unittest.TestCase):
         bar = "bcccbac"
         bar = set(Solution.swaps(bar))
         pass
-
-    def test_distance(self):
-        foo = Solution("abcdabcd").distances()
-        foo = Solution("cbaabbb").distances()
-        bar = Solution("abbabb").distances()
-        self.assertEqual(foo, bar)
 
 
 if __name__ == '__main__':

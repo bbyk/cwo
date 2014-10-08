@@ -1,5 +1,4 @@
 import sys
-import time
 from collections import OrderedDict
 
 __author__ = 'bbyk'
@@ -17,7 +16,7 @@ class Solution:
             return 0
 
         if self.sorted_key not in self.g_cache:
-            self.build_cache()
+            self.ensure_cache()
         return round(self.g_cache[self.sorted_key][self.norm_str], 4)
 
     def palindromes(self):
@@ -88,40 +87,30 @@ class Solution:
         self.norm_str = "".join([ht[c] for c in self.str])
         self.n1_perm = ((len(self.norm_str) - 1) * len(self.norm_str)) >> 1
 
-    def distances(self):
-        perm2all = {}
-        for palin in self.palindromes():
-            perm2palin = {}
-            stack = [[palin, 0]]
-            visited = {palin}
-            cnt = 0
-            while len(stack):
-                cnt += 1
-                pop, dist = stack.pop(0)
-                if not self.is_palindom(pop):
-                    if pop not in perm2palin:
-                        perm2palin[pop] = dist
-                    else:
-                        perm2palin[pop] = min(dist, perm2palin[pop])
+    @staticmethod
+    def same_of(s):
+        '''
+        If you swap mirrored chars it doesn't lead to a palindrome. All such permutations have the same expectation.
+        '''
+        r = list(s)
+        for perm in Solution.sameness_r(r, 0):
+            yield perm
+            yield perm[::-1]
 
-                dist += 1
-                for perm in self.swaps(pop):
-                    if perm not in visited:
-                        visited.add(perm)
-                        visited.add(perm[::-1])
-                        stack.append([perm, dist])
-                        stack.append([perm[::-1], dist])
+    @staticmethod
+    def sameness_r(r, i):
+        l = len(r) >> 1
+        if l == i:
+            yield "".join(r)
+            return
 
-            for k, v in perm2palin.items():
-                if k not in perm2all:
-                    perm2all[k] = [v]
-                else:
-                    perm2all[k].append(v)
-
-        for k in perm2all.keys():
-            perm2all[k] = tuple(perm2all[k])
-
-        return perm2all
+        for ix in range(i, l):
+            # for perm in Solution.sameness_r(r, ix + 1):
+            # yield perm
+            r[i], r[-1 - i] = r[-1 - i], r[i]
+            for perm in Solution.sameness_r(r, ix + 1):
+                yield perm
+            r[i], r[-1 - i] = r[-1 - i], r[i]
 
 
     @staticmethod
@@ -142,24 +131,20 @@ class Solution:
                 return False
         return True
 
-    def build_cache(self):
-        now = time.time()
+    def ensure_cache(self):
         stack = [self.sorted_key]
         visited_perm = {self.sorted_key}
-        dist = self.distances()
-        di = 0
 
-        n_dist = len(set(dist.values()))
+        sames = {}
 
         var_id = 0
         vars = {}
         eqvs = OrderedDict()
-        pops = set()
 
         while len(stack):
-            pop = stack.pop()
-            eqv = []
-            eqvm = {}
+            pop = stack.pop(0)
+            eq_var = []
+            eq_var_freq = {}
 
             for perm in Solution.swaps(pop):
                 if not self.is_palindom(perm):
@@ -167,37 +152,41 @@ class Solution:
                         visited_perm.add(perm)
                         stack.append(perm)
 
-                    dist_p = dist[perm]
-                    if dist_p not in eqvm:
-                        eqvm[dist_p] = 1
-                        eqv.append(dist_p)
+                    if perm not in sames:
+                        for p in Solution.same_of(perm):
+                            sames[p] = perm
+
+                    dist_p = sames[perm]
+                    if dist_p not in eq_var_freq:
+                        eq_var_freq[dist_p] = 1
+                        eq_var.append(dist_p)
 
                         if dist_p not in vars:
                             vars[dist_p] = var_id
                             # vars[var_id] = dist_p
                             var_id += 1
                     else:
-                        eqvm[dist_p] += 1
-            pop_dist = dist[pop]
-            eqvm[pop_dist] -= self.n1_perm
+                        eq_var_freq[dist_p] += 1
+            eq_var_freq[sames[pop]] -= self.n1_perm
 
-            eqv = frozenset(eqv)
-            if pop_dist not in pops and eqv not in eqvs:
-                eqvs[eqv] = eqvm
-                pops.add(pop_dist)
+            eq_var = frozenset([(t, eq_var_freq[t]) for t in eq_var])
 
-            if len(eqvs) == n_dist:
-                break
+            if eq_var not in eqvs:
+                eqvs[eq_var] = eq_var
+
+            # if len(eqvs) == len(vars):
+            #     break
 
         assert self.sorted_key in visited_perm
         assert self.norm_str in visited_perm
+        assert len(eqvs) == len(vars)
 
         m = [[(0 if t < var_id else -1) for t in range(var_id + 1)] for j in range(var_id)]
         i = 0
-        for eqv, eqvm in eqvs.items():
-            for var in eqv:
+        for eq_var in eqvs.keys():
+            for var, freq in eq_var:
                 j = vars[var]
-                m[i][j] = eqvm[var] / self.n1_perm
+                m[i][j] = freq / self.n1_perm
             i += 1
 
         for i in range(len(m) - 1):
@@ -218,15 +207,7 @@ class Solution:
 
         perm2e_cache = {}
         for perm in visited_perm:
-            perm2e_cache[perm] = i2e_cache[vars[dist[perm]]]
-
-        fgh = {}
-        for e in perm2e_cache.values():
-            re = round(e, 4)
-            if re not in fgh:
-                fgh[re] = 1
-            else:
-                fgh[re] += 1
+            perm2e_cache[perm] = i2e_cache[vars[sames[perm]]]
 
         self.g_cache[self.sorted_key] = perm2e_cache
 
@@ -242,7 +223,9 @@ if __name__ == "__main__":
 
     T = int(cin.readline())
     while T:
-        print(Solution(cin.readline()).expectation())
+        line = cin.readline().split('\n', 1)[0].split(' ', 1)[0]
+        # print(line)
+        print("%4.4f" % Solution(line).expectation())
         T -= 1
 
     if cin is not sys.stdin:
