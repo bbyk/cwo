@@ -1,4 +1,5 @@
 import sys
+import time
 from collections import OrderedDict
 
 __author__ = 'bbyk'
@@ -9,24 +10,57 @@ class Solution:
 
     def __init__(self, str):
         self.str = str
-        self.mid_c = None
-        self.norm_str = None
+        self.normalize()
 
     def expectation(self):
         if self.is_palindom(self.str):
             return 0
 
-        self.normalize()
-
         if self.sorted_key not in self.g_cache:
             self.build_cache()
         return round(self.g_cache[self.sorted_key][self.norm_str], 4)
 
+    def palindromes(self):
+        ''' 
+        all possible palindromes are all permutation of a half of the palindrome reciprocated to the other half.
+        '''
+
+        visited = set()
+
+        s = list(self.norm_palin)
+        l = len(s) >> 1
+        i = 0
+        j = 0
+        stack = []
+
+        while True:
+            if i == l:
+                perm = "".join(s)
+                if perm not in visited:
+                    visited.add(perm)
+                    yield perm
+                i, j = stack.pop()
+                s[-1 - i], s[-1 - j] = s[-1 - j], s[-1 - i]
+                s[i], s[j] = s[j], s[i]
+                j += 1
+                continue
+
+            if j == l:
+                if len(stack) == 0:
+                    break
+                i, j = stack.pop()
+                s[-1 - i], s[-1 - j] = s[-1 - j], s[-1 - i]
+                s[i], s[j] = s[j], s[i]
+                j += 1
+                continue
+
+            s[i], s[j] = s[j], s[i]
+            s[-1 - i], s[-1 - j] = s[-1 - j], s[-1 - i]
+            stack.append([i, j])
+            i += 1
+            j = i
 
     def normalize(self):
-        if self.norm_str is not None:
-            return
-
         ht = OrderedDict()
         for c in self.str:
             if c not in ht:
@@ -35,30 +69,59 @@ class Solution:
                 ht[c][1] += 1
         vals = sorted(ht.values(), key=lambda p: p[1])
         key = []
+        palin = []
         c = ord('a')
         for i in range(len(vals)):
             p = vals[i]
             norm_c = chr(c + i)
             if p[1] == 1:
                 self.mid_c = norm_c
+                palin.append(norm_c)
             ht[p[0]] = norm_c
             for j in range(p[1]):
                 key.append(norm_c)
-
+            for j in range(p[1] >> 1):
+                palin.append(norm_c)
+                palin.insert(0, norm_c)
+        self.norm_palin = "".join(palin)
         self.sorted_key = "".join(key)
         self.norm_str = "".join([ht[c] for c in self.str])
+        self.n1_perm = ((len(self.norm_str) - 1) * len(self.norm_str)) >> 1
 
-    def distance(self):
-        self.normalize()
+    def distances(self):
+        perm2all = {}
+        for palin in self.palindromes():
+            perm2palin = {}
+            stack = [[palin, 0]]
+            visited = {palin}
+            cnt = 0
+            while len(stack):
+                cnt += 1
+                pop, dist = stack.pop(0)
+                if not self.is_palindom(pop):
+                    if pop not in perm2palin:
+                        perm2palin[pop] = dist
+                    else:
+                        perm2palin[pop] = min(dist, perm2palin[pop])
 
-        swaps2p = 0
-        for i in range(len(self.norm_str) >> 1):
-            c = self.norm_str[i]
-            if c == self.mid_c:
-                swaps2p += 1
-            elif self.norm_str[-i - 1] != c:
-                swaps2p += 1
-        return swaps2p
+                dist += 1
+                for perm in self.swaps(pop):
+                    if perm not in visited:
+                        visited.add(perm)
+                        visited.add(perm[::-1])
+                        stack.append([perm, dist])
+                        stack.append([perm[::-1], dist])
+
+            for k, v in perm2palin.items():
+                if k not in perm2all:
+                    perm2all[k] = [v]
+                else:
+                    perm2all[k].append(v)
+
+        for k in perm2all.keys():
+            perm2all[k] = tuple(perm2all[k])
+
+        return perm2all
 
 
     @staticmethod
@@ -80,42 +143,62 @@ class Solution:
         return True
 
     def build_cache(self):
+        now = time.time()
         stack = [self.sorted_key]
+        visited_perm = {self.sorted_key}
+        dist = self.distances()
+        di = 0
+
+        n_dist = len(set(dist.values()))
+
         var_id = 0
         vars = {}
-        eqvs = []
-        p = None
-        n_perm = 0
+        eqvs = OrderedDict()
+        pops = set()
 
         while len(stack):
-            pop = stack.pop(0)
-            eqvs.append([pop])
+            pop = stack.pop()
+            eqv = []
+            eqvm = {}
 
             for perm in Solution.swaps(pop):
-                if p is None:
-                    n_perm += 1
                 if not self.is_palindom(perm):
-                    if perm not in vars:
-                        vars[perm] = var_id
-                        # vars[var_id] = perm
-                        var_id += 1
-                        if pop != perm:
-                            stack.append(perm)
+                    if perm not in visited_perm:
+                        visited_perm.add(perm)
+                        stack.append(perm)
 
-                    eqvs[-1].append(perm)
+                    dist_p = dist[perm]
+                    if dist_p not in eqvm:
+                        eqvm[dist_p] = 1
+                        eqv.append(dist_p)
 
-            p = 1 / n_perm
+                        if dist_p not in vars:
+                            vars[dist_p] = var_id
+                            # vars[var_id] = dist_p
+                            var_id += 1
+                    else:
+                        eqvm[dist_p] += 1
+            pop_dist = dist[pop]
+            eqvm[pop_dist] -= self.n1_perm
 
-        assert self.sorted_key in vars
-        assert self.norm_str in vars
+            eqv = frozenset(eqv)
+            if pop_dist not in pops and eqv not in eqvs:
+                eqvs[eqv] = eqvm
+                pops.add(pop_dist)
+
+            if len(eqvs) == n_dist:
+                break
+
+        assert self.sorted_key in visited_perm
+        assert self.norm_str in visited_perm
 
         m = [[(0 if t < var_id else -1) for t in range(var_id + 1)] for j in range(var_id)]
-        for i, eqv in enumerate(eqvs):
-            vp = vars[eqv[0]]
-            m[i][vp] -= 1
-            for var in eqv[1:]:
-                vp = vars[var]
-                m[i][vp] += p
+        i = 0
+        for eqv, eqvm in eqvs.items():
+            for var in eqv:
+                j = vars[var]
+                m[i][j] = eqvm[var] / self.n1_perm
+            i += 1
 
         for i in range(len(m) - 1):
             for k in range(i + 1, len(m)):
@@ -124,6 +207,7 @@ class Solution:
                 for j in range(i + 1, len(m[i])):
                     m[k][j] = m[k][j] - (coef * m[i][j])
                 pass
+            pass
 
         i2e_cache = {}
         for i in range(len(m) - 1, - 1, -1):
@@ -133,8 +217,16 @@ class Solution:
             i2e_cache[i] = (m[i][-1] - sum ) / m[i][i]
 
         perm2e_cache = {}
-        for perm in vars.keys():
-            perm2e_cache[perm] = i2e_cache[vars[perm]]
+        for perm in visited_perm:
+            perm2e_cache[perm] = i2e_cache[vars[dist[perm]]]
+
+        fgh = {}
+        for e in perm2e_cache.values():
+            re = round(e, 4)
+            if re not in fgh:
+                fgh[re] = 1
+            else:
+                fgh[re] += 1
 
         self.g_cache[self.sorted_key] = perm2e_cache
 

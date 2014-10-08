@@ -1,6 +1,8 @@
 import unittest
+import math
 
 from bbyk.hackerrank.palindromes import Solution
+
 
 __author__ = 'bbyk'
 
@@ -29,10 +31,37 @@ class PalindromTests(unittest.TestCase):
         self.assertEqual(s.norm_str, "baccb")
         self.assertEqual(s.mid_c, 'a')
 
+    def test_swaps(self):
+        l = list(Solution("cbaabbb").swaps("cbaabbb"))
+        h = {}
+        for p in l:
+            if p not in h:
+                h[p] = 1
+            else:
+                h[p] += 1
+        s = set(l)
+        print(len(l), len(h), h)
+        pass
     def test_expectation(self):
         # self.assertEqual(3, Solution("abb").expectation())
         self.assertEqual(59.3380, Solution("cbaabbb").expectation())
         # self.assertEqual(59.3380, Solution("cbdecbd").expectation())
+
+    def test_allpalin(self):
+        s = "abcdabcd"
+        half = len(s) >> 1
+        self.assertEqual(math.factorial(half), len(list(Solution(s).palindromes())))
+
+        s = "abccabcc"
+        half = len(s) >> 1
+        # twice as less palindromes are there because of cc
+        self.assertEqual(math.factorial(half) >> 1, len(list(Solution(s).palindromes())))
+
+        s = "cccccccc"
+        half = len(s) >> 1
+        # 16x as less palindromes are there because of cc
+        self.assertEqual(math.factorial(half) >> 4, len(list(Solution(s).palindromes())))
+
 
     def test_total(self):
         foo = "abbcccc"
@@ -42,10 +71,10 @@ class PalindromTests(unittest.TestCase):
         pass
 
     def test_distance(self):
-        foo = Solution("abcccbc").distance()
-        bar = Solution("bcacccb").distance()
+        foo = Solution("abcdabcd").distances()
+        foo = Solution("cbaabbb").distances()
+        bar = Solution("abbabb").distances()
         self.assertEqual(foo, bar)
-        self.assertEqual(1, foo)
 
 
 if __name__ == '__main__':
