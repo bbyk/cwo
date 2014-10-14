@@ -22,7 +22,33 @@ public:
 
 private:
     fraction abs_ji_is_less_k();
+
+    static unsigned long gcd(unsigned long l, unsigned long r);
 };
+
+unsigned long Solution::gcd(unsigned long l, unsigned long r) {
+    if (l < r) {
+        unsigned long tmp = r;
+        r = l;
+        l = tmp;
+    }
+
+    if (0 == r)
+        return l;
+    if (1 == r)
+        return 1;
+
+    if ((l & 1) && (r & 1)) {
+        return gcd(l - r, r);
+    } else if (!(l & 1) && (r & 1)) {
+        return gcd(l >> 1, r);
+    } else if ((l & 1) && !(r & 1)) {
+        return gcd(l, r >> 1);
+    } else if (!(l & 1) && !(r & 1)) {
+        return gcd(l >> 1, r >> 1) << 1;
+    }
+    return 0;
+}
 
 fraction Solution::abs_ji_is_less_k() {
     unsigned long dd = 0L;
@@ -52,9 +78,10 @@ fraction Solution::abs_ji_is_less_k() {
         }
     }
 
-    unsigned long gcd = __gcd(dd, dr);
+    unsigned long gcd = Solution::gcd(dd, dr);
     return make_tuple(dd / gcd, dr / gcd);
 }
+
 
 string Solution::to_string() {
     fraction p = abs_ji_is_less_k();
