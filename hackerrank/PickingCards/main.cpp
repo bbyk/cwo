@@ -24,7 +24,6 @@ int main(int argc, const char *argv[]) {
     while (T--) {
         *file >> N;
 
-        // tree map essentially, worst case 50,000 * lg2(50000) ~= 50,000 * 16 = 800,000
         unordered_map<unsigned, unsigned> ht;
         for (auto i = 0; i < N; i++) {
             *file >> c;
