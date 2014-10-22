@@ -39,6 +39,8 @@ int main(int argc, const char *argv[]) {
 
         // minus those wrongly allocated
         res -= (nCr_luke_mod_prime(AsPlusBs, As - 1) << 1) % PRIME;
+        if (res < 0)
+            res = PRIME + res;
 
         if (As > 1) {
             // plus those we accidentally took away: http://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle#Counting_integers
