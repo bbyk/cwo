@@ -3,6 +3,8 @@
 #include <assert.h>
 
 // https://www.hackerrank.com/challenges/manasa-and-combinatorics
+// influenced by this explanation: http://codeforces.com/blog/entry/12071
+
 const unsigned PRIME = 99991;
 
 using namespace std;
