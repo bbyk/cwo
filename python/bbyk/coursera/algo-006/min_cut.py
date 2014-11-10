@@ -8,7 +8,7 @@ __author__ = 'bbyk'
 class MinCut:
     def value(self):
         min = None
-        max_iter = 3 * int(math.ceil(math.log(len(self.input))))
+        max_iter = len(self.input)
         while max_iter > 0:
             self.extractVE()
             cut_of_g = self.min_cut()
