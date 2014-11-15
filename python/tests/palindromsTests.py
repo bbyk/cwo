@@ -1,7 +1,7 @@
 import unittest
 import math
 
-from bbyk.hackerrank.palindromes import Solution
+from hackerrank.palindromes import Solution
 
 
 __author__ = 'bbyk'

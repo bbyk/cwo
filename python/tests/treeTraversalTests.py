@@ -1,6 +1,6 @@
 import unittest
-from bbyk.treeTraversal import TraversalUtils
-from bbyk.treeTraversal import Node
+from treeTraversal import TraversalUtils
+from treeTraversal import Node
 
 class TraversalUtilsTests(unittest.TestCase):
     def setUp(self):
