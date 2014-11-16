@@ -29,6 +29,7 @@ class SccFinder():
                 for node in self.dfs(v, tail_ix=0, head_ix=1):
                     s += 1
 
+                print(s)
                 if not top_heap or (s == top_heap[0] and len(top_heap) < max_scc):
                     heapq.heappush(top_heap, s)
                 elif s > top_heap[0]:
@@ -81,7 +82,7 @@ if __name__ == "__main__":
     V = [[] for t in range(T)]
 
     while True:
-        line = cin.readline().rstrip('\n\t')
+        line = cin.readline().rstrip('\n\t ')
         if not line:
             break
         arc = tuple([int(s) - 1 for s in line.split(' ')])
