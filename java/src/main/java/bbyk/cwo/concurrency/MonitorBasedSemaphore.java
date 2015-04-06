@@ -22,13 +22,11 @@ public class MonitorBasedSemaphore {
 
     public void aquire() throws InterruptedException {
         synchronized (syncRoot) {
-            if (permits > 0) {
-                permits--;
-                return;
-            }
             while (permits == 0) {
                 syncRoot.wait();
             }
+
+            permits--;
         }
     }
 
