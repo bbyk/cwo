@@ -1,3 +1,5 @@
+// https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/
+
 #include <iostream>
 #include <deque>
 #include <unordered_map>
@@ -45,9 +47,9 @@ public:
 
                 crumb.first = false;
 
-                for (auto it = pq.cbegin(); it != pq.cend(); ++it) {
+                for (auto it = pq.cbegin(); it != pq.cend(); ) {
                     if (*it == crumb.node) {
-                        pq.erase(it);
+                        it = pq.erase(it);
                         if (pq.size() == 1) {
                             left_path = path;
                         } else {
@@ -63,6 +65,8 @@ public:
 
                             return split;
                         }
+                    } else {
+                        ++it;
                     }
                 }
 
