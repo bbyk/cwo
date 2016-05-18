@@ -37,7 +37,7 @@ public:
         deque<BreadCrumb> path, left_path;
         TreeNode *node = root;
 
-        while (nullptr != node || path.size() > 0) {
+        while (nullptr != node || !path.empty()) {
             if (nullptr == node) {
                 BreadCrumb &crumb = path.back();
                 if (!crumb.first) {
