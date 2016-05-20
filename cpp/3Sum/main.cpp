@@ -2,14 +2,12 @@
 
 #include <iostream>
 #include <vector>
-#include <unordered_map>
-#include <unordered_set>
 #include <ctime>
-#include <algorithm>
 #include <map>
 
 using namespace std;
 
+/*
 namespace std {
     template<typename T>
     struct hash<vector<T>> {
@@ -23,6 +21,7 @@ namespace std {
         }
     };
 }
+*/
 
 class Solution {
 public:
@@ -33,19 +32,19 @@ public:
         }
 
         // sorted map
-        map<int, int> mapped;
+        map<int, int> sortedMapped;
         for (int num : nums) {
-            mapped[num]++;
+            sortedMapped[num]++;
         }
 
         // all the values are positive, can't make sum of zero
-        if (mapped.begin()->first > 0) {
+        if (sortedMapped.begin()->first > 0) {
             return result;
         }
 
-        for (auto firstIt = mapped.begin(); firstIt != mapped.end();) {
+        for (auto firstIt = sortedMapped.begin(); firstIt != sortedMapped.end();) {
             int first = firstIt->first;
-            for (auto secondIt = firstIt; secondIt != mapped.end(); ++secondIt) {
+            for (auto secondIt = firstIt; secondIt != sortedMapped.end(); ++secondIt) {
                 int second = secondIt->first;
                 // third is even greater than second so, 3sum won't balance to zero
                 if (second > (-first >> 1))
@@ -56,8 +55,8 @@ public:
                 }
                 int third = -first - second;
 
-                auto thirdIt = mapped.find(third);
-                if (thirdIt == mapped.end()
+                auto thirdIt = sortedMapped.find(third);
+                if (thirdIt == sortedMapped.end()
                     || ((first == second && second == third) && 2 == thirdIt->second)
                     || (second == third && 1 == thirdIt->second)) {
                     continue;
@@ -65,7 +64,7 @@ public:
 
                 result.push_back({first, second, third});
             }
-            firstIt = mapped.erase(firstIt);
+            firstIt = sortedMapped.erase(firstIt);
         }
         return result;
     }
