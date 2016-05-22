@@ -9,42 +9,45 @@ using namespace std;
 
 class Solution {
 private:
-    using xrow = vector<int>;
+    using xrow_type = vector<int>;
 public:
-    int minPathSum(vector<xrow> &grid) {
+    int minPathSum(vector<xrow_type> &grid) {
         // trivial case
         if (grid.empty()) {
             return 0;
         }
-        vector<xrow> min_grid;
+        // the grid of the same dimensions as the grid
+        // where each cell(x,y) is the min of cell(x - 1, y) and
+        // cell(x, y-1)
+        vector<xrow_type> min_grid;
         min_grid.reserve(grid.size());
 
-        xrow *prev_row = nullptr;
+        xrow_type *y_minus_1_row = nullptr;
         for (auto &row : grid) {
             // first line is the same as in the original grid
-            xrow min_row;
+            xrow_type min_row;
             min_row.reserve(row.size());
 
             if (min_grid.empty()) {
                 // the special case when we don't have previous row
-                int prev = 0;
+                int x_minus_1 = 0;
                 for (auto cost : row) {
-                    prev += cost;
-                    min_row.push_back(prev);
+                    x_minus_1 += cost;
+                    min_row.push_back(x_minus_1);
                 }
             } else {
-                assert(NULL != prev_row);
+                assert(NULL != y_minus_1_row);
 
-                auto prevIt = prev_row->begin();
-                int prev = prev_row->front();
+                auto y_minus_1 = y_minus_1_row->begin();
+                int x_minus_1 = y_minus_1_row->front();
                 for (auto cost : row) {
-                    prev = min(*prevIt, prev) + cost;
-                    min_row.push_back(prev);
-                    ++prevIt;
+                    x_minus_1 = min(*y_minus_1, x_minus_1) + cost;
+                    min_row.push_back(x_minus_1);
+                    ++y_minus_1;
                 }
             }
             min_grid.push_back(min_row);
-            prev_row = &min_grid.back();
+            y_minus_1_row = &min_grid.back();
         }
         return *min_grid.rbegin()->rbegin();
     }

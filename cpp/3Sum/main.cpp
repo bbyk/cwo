@@ -76,17 +76,17 @@ std {
     template<typename T>
     ostream &operator<<(ostream &out, const vector<vector<T>> &v) {
         for (const auto &iv : v) {
-            cout << '(';
+            out << '(';
             bool first = true;
             for (const auto &tv : iv) {
                 if (first) {
                     first = false;
                 } else {
-                    cout << ", ";
+                    out << ", ";
                 }
-                cout << tv;
+                out << tv;
             }
-            cout << ')' << endl;
+            out << ')' << endl;
         }
 
         return out;
