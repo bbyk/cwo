@@ -5,4 +5,4 @@ project(problem)
 set(SOURCE_FILES main.cpp)
 add_executable(problem ${SOURCE_FILES})
 
-file(COPY g1.txt g2.txt g3.txt DESTINATION .)
+file(COPY g1.txt g2.txt g3.txt gt1.txt gt2.txt DESTINATION .)
