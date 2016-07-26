@@ -25,7 +25,7 @@ public:
         // if f(i, j ) == 2 -> terminate the algorithm
 
         // we don't need a s by t 2d array, instead this is enough
-        vector<vector<int>> a(s.size() + 1, vector<int>(3));
+        auto a = new int[s.size() + 1][3];
         a[0][1] = 0;
         a[0][2] = 1;
         if (!s.empty())
@@ -52,7 +52,9 @@ public:
             }
         }
 
-        return a[s.size()][end_j] == 1;
+        bool result = a[s.size()][end_j] == 1;
+        delete[] a;
+        return result;
     }
 };
 
